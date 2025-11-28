@@ -1,281 +1,3 @@
-//#include <windows.h>
-//#include <math.h>
-//#include <GL/freeglut.h>
-//
-//float chickenAngle = 0.0f;
-//float chickenX = 0;
-//
-//float shipX = 0;
-//float followSpeed = 0.04f;
-//
-//float eggFall = 0.0f;
-//float eggX = 0;
-//
-//float bulletY = -200;
-//float bulletX = 0;
-//bool bulletActive = false;
-//
-//float eggFallSpeed = 4.0f;
-//float bulletSpeed = 8.0f;
-//
-//float avoidPower = 2.0f;   // how strong the ship avoids the egg
-//
-//// UFO animation
-//float ufoAngle = 0.0f;     // rotation of UFO
-//float ufoOrbit = 0.0f;     // orbit movement of UFO
-//
-///* ---------------------------------- */
-///* DRAW FUNCTIONS                     */
-///* ---------------------------------- */
-//void drawShip() {
-//    glColor3f(0.2f, 0.6f, 1.0f);
-//    glBegin(GL_TRIANGLES);
-//    glVertex2f(0, 30);
-//    glVertex2f(-20, -20);
-//    glVertex2f(20, -20);
-//    glEnd();
-//
-//    glColor3f(1.0f, 0.2f, 0.2f);
-//    glBegin(GL_QUADS);
-//    glVertex2f(-10, -20);
-//    glVertex2f(10, -20);
-//    glVertex2f(10, -40);
-//    glVertex2f(-10, -40);
-//    glEnd();
-//}
-//
-//void drawChicken() {
-//    glColor3f(1.0f, 1.0f, 0.0f);
-//    glBegin(GL_TRIANGLE_FAN);
-//    glVertex2f(0, 0);
-//    for (int i = 0; i <= 20; i++) {
-//        float a = i * 2.0f * 3.1416f / 20.0f;
-//        glVertex2f(25.0f * cosf(a), 25.0f * sinf(a));
-//    }
-//    glEnd();
-//
-//    glColor3f(1.0f, 0.3f, 0.3f);
-//    glBegin(GL_TRIANGLES);
-//    glVertex2f(0, 25);
-//    glVertex2f(-10, 40);
-//    glVertex2f(10, 40);
-//    glEnd();
-//}
-//
-//void drawEgg() {
-//    glColor3f(1, 1, 1);
-//    glBegin(GL_TRIANGLE_FAN);
-//    glVertex2f(0, 0);
-//    for (int i = 0; i <= 20; i++) {
-//        float a = i * 2.0f * 3.1416f / 20.0f;
-//        glVertex2f(8.0f * cosf(a), 12.0f * sinf(a));
-//    }
-//    glEnd();
-//}
-//
-//void drawBullet() {
-//    glColor3f(1, 0, 0);
-//    glBegin(GL_QUADS);
-//    glVertex2f(-4, -4);
-//    glVertex2f(4, -4);
-//    glVertex2f(4, 4);
-//    glVertex2f(-4, 4);
-//    glEnd();
-//}
-//
-//void drawStar() {
-//    glColor3f(1, 1, 1);
-//    glBegin(GL_POINTS);
-//    glVertex2f(0, 0);
-//    glEnd();
-//}
-//
-//// UFO shape
-//void drawUFO() {
-//    // upper dome
-//    glColor3f(0.7f, 0.7f, 1.0f);
-//    glBegin(GL_TRIANGLE_FAN);
-//    glVertex2f(0, 0);
-//    for (int i = 0; i <= 40; i++) {
-//        float a = i * 2.0f * 3.1416f / 40.0f;
-//        glVertex2f(25.0f * cosf(a), 12.0f * sinf(a));
-//    }
-//    glEnd();
-//
-//    // lower platform
-//    glColor3f(0.5f, 0.5f, 0.9f);
-//    glBegin(GL_QUADS);
-//    glVertex2f(-40, -8);
-//    glVertex2f(40, -8);
-//    glVertex2f(50, -16);
-//    glVertex2f(-50, -16);
-//    glEnd();
-//}
-//
-///* ---------------------------------- */
-///* COLLISION CHECK                    */
-///* ---------------------------------- */
-//bool bulletHitsChicken() {
-//    return fabs(bulletX - chickenX) < 25 && fabs(bulletY - 150) < 25;
-//}
-//
-//bool eggWillHitShipSoon() {
-//    float eggY = 150 - eggFall;
-//
-//    // check only when egg is near ship vertically
-//    if (eggY < -140 && eggY > -260) {
-//        if (fabs(eggX - shipX) < 40) {
-//            return true;
-//        }
-//    }
-//    return false;
-//}
-//
-///* ---------------------------------- */
-///* DISPLAY                            */
-///* ---------------------------------- */
-//void displayFcn(void) {
-//    glClear(GL_COLOR_BUFFER_BIT);
-//
-//    // stars background
-//    glPointSize(3);
-//    for (int i = 0; i < 20; i++) {
-//        glPushMatrix();
-//        glTranslatef(-300 + rand() % 600, -300 + rand() % 600, 0);
-//        drawStar();
-//        glPopMatrix();
-//    }
-//
-//    // UFO with composed transformations (translations + rotation)
-//    glPushMatrix();
-//
-//    // translation 1: base height of UFO above scene
-//    glTranslatef(0, 200, 0);
-//
-//    // translation 2: orbit movement (composition of translations)
-//    glTranslatef(120.0f * cosf(ufoOrbit), 40.0f * sinf(ufoOrbit), 0);
-//
-//    // rotation of UFO around its own center
-//    glRotatef(ufoAngle, 0, 0, 1);
-//
-//    drawUFO();
-//
-//    glPopMatrix();
-//
-//    // chicken
-//    glPushMatrix();
-//    glTranslatef(chickenX, 150, 0);
-//    drawChicken();
-//    glPopMatrix();
-//
-//    // falling egg
-//    glPushMatrix();
-//    glTranslatef(eggX, 150 - eggFall, 0);
-//    drawEgg();
-//    glPopMatrix();
-//
-//    // bullet
-//    if (bulletActive) {
-//        glPushMatrix();
-//        glTranslatef(bulletX, bulletY, 0);
-//        drawBullet();
-//        glPopMatrix();
-//    }
-//
-//    // player ship
-//    glPushMatrix();
-//    glTranslatef(shipX, -200, 0);
-//    drawShip();
-//    glPopMatrix();
-//
-//    glFlush();
-//}
-//
-///* ---------------------------------- */
-///* ANIMATION                          */
-///* ---------------------------------- */
-//void timerFcn(int value)
-//{
-//    // chicken moves left-right (sinus)
-//    chickenAngle += 0.03f;
-//    chickenX = 150.0f * sinf(chickenAngle);
-//
-//    // egg follows chicken horizontally and falls down
-//    eggX = chickenX;
-//    eggFall += eggFallSpeed;
-//    if (eggFall > 350) eggFall = 0;
-//
-//    // ship follows chicken if egg is not dangerous
-//    if (!eggWillHitShipSoon()) {
-//        shipX += (chickenX - shipX) * followSpeed;
-//    }
-//    else {
-//        // avoidance movement
-//        if (shipX < eggX)
-//            shipX -= avoidPower;
-//        else
-//            shipX += avoidPower;
-//    }
-//
-//    // automatic bullet firing
-//    if (!bulletActive) {
-//        bulletActive = true;
-//        bulletX = shipX;
-//        bulletY = -160;
-//    }
-//
-//    if (bulletActive) {
-//        bulletY += bulletSpeed;
-//
-//        if (bulletHitsChicken()) {
-//            bulletActive = false;
-//        }
-//
-//        if (bulletY > 400)
-//            bulletActive = false;
-//    }
-//
-//    // UFO animation: spin + orbit
-//    ufoAngle += 2.0f;
-//    if (ufoAngle > 360.0f) ufoAngle -= 360.0f;
-//
-//    ufoOrbit += 0.01f;
-//    if (ufoOrbit > 6.2832f) ufoOrbit -= 6.2832f;
-//
-//    glutPostRedisplay();
-//    glutTimerFunc(16, timerFcn, 1);
-//}
-//
-///* ---------------------------------- */
-//void reshapeFcn(int w, int h)
-//{
-//    glViewport(0, 0, w, h);
-//
-//    glMatrixMode(GL_PROJECTION);
-//    glLoadIdentity();
-//    gluOrtho2D(-350, 350, -350, 350);
-//
-//    glMatrixMode(GL_MODELVIEW);
-//    glLoadIdentity();
-//}
-//
-///* ---------------------------------- */
-//int main(int argc, char** argv)
-//{
-//    glutInit(&argc, argv);
-//    glutInitWindowSize(700, 700);
-//    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
-//    glutCreateWindow("Chicken Invaders - Transformations and UFO");
-//
-//    glClearColor(0, 0, 0.1f, 1);
-//
-//    glutDisplayFunc(displayFcn);
-//    glutReshapeFunc(reshapeFcn);
-//    glutTimerFunc(16, timerFcn, 1);
-//
-//    glutMainLoop();
-//    return 0;
-//}
 #include <windows.h>
 #include <math.h>
 #include <stdio.h>
@@ -285,9 +7,18 @@
 // Window / world settings
 // -------------------------------
 const int   WIN_WIDTH = 800;
-const int   WIN_HEIGHT = 800;
+const int   WIN_HEIGHT = 700;
 const float WORLD_MIN = -400.0f;
 const float WORLD_MAX = 400.0f;
+
+// -------------------------------
+// Helpers / Display lists
+// -------------------------------
+const float TWO_PI = 6.2831853f;
+GLuint circleDL;    // created in init()
+GLuint shipDL;
+GLuint eggDL;
+GLuint explosionRingDL;
 
 // -------------------------------
 // Player / game state
@@ -296,6 +27,13 @@ int   score = 0;
 int   lives = 3;
 bool  gameOver = false;
 bool  gameWin = false;
+
+// explosion at game over
+bool  shipExplosionActive = false;
+float shipExplosionX = 0.0f;
+float shipExplosionY = 0.0f;
+float shipExplosionTimer = 0.0f;   // time in seconds
+const float shipExplosionMaxTime = 0.6f;  // total duration (0.6 sec)
 
 // -------------------------------
 // Ship (player)
@@ -352,9 +90,38 @@ float ufoOrbit = 0.0f;              // orbit angle
 float ufoOrbitRadiusX = 200.0f;
 float ufoOrbitRadiusY = 60.0f;
 
+// scale and pulse for simulating the object moving closer or farther from the camera
+float ufoScale = 1.0f;
+float ufoTargetScale = 1.2f;
+bool  ufoApproach = false;
+
+float ufoPulsePhase = 0.0f;         // sinus phase
+float ufoPulseAmount = 0.2f;        // pulse amplitude (how strong the UFO scales in/out)
+float ufoLifeStep = 0.2f;           // how much the UFO permanently grows when the player loses a life
+
 // -------------------------------
 // Utility
 // -------------------------------
+// draw a circle with radius r and center at(cx, cy)
+void drawCircle(float cx, float cy, float r)
+{
+    glPushMatrix();
+    glTranslatef(cx, cy, 0.0f);
+    glScalef(r, r, 1.0f);
+    glCallList(circleDL);
+    glPopMatrix();
+}
+
+// draw ellipse using different radius on x and y
+void drawEllipse(float cx, float cy, float rx, float ry)
+{
+    glPushMatrix();
+    glTranslatef(cx, cy, 0.0f);
+    glScalef(rx, ry, 1.0f);
+    glCallList(circleDL);
+    glPopMatrix();
+}
+
 float toRad(float deg) {
     return deg * 3.1415926f / 180.0f;
 }
@@ -364,35 +131,14 @@ float toRad(float deg) {
 // -------------------------------
 void drawShip()
 {
-    // body
-    glColor3f(0.2f, 0.6f, 1.0f);
-    glBegin(GL_TRIANGLES);
-    glVertex2f(0, 40);
-    glVertex2f(-25, -25);
-    glVertex2f(25, -25);
-    glEnd();
-
-    // engine
-    glColor3f(1.0f, 0.3f, 0.2f);
-    glBegin(GL_QUADS);
-    glVertex2f(-12, -25);
-    glVertex2f(12, -25);
-    glVertex2f(12, -45);
-    glVertex2f(-12, -45);
-    glEnd();
+    glCallList(shipDL);
 }
 
 void drawChickenShape()
 {
     // body
     glColor3f(1.0f, 1.0f, 0.0f);
-    glBegin(GL_TRIANGLE_FAN);
-    glVertex2f(0, 0);
-    for (int i = 0; i <= 25; ++i) {
-        float a = i * 2.0f * 3.1415926f / 25.0f;
-        glVertex2f(20.0f * cosf(a), 20.0f * sinf(a));
-    }
-    glEnd();
+    drawCircle(0.0f, 0.0f, 20.0f);
 
     // comb
     glColor3f(1.0f, 0.3f, 0.3f);
@@ -406,15 +152,7 @@ void drawChickenShape()
 void drawEggShape()
 {
     glColor3f(1, 1, 1);
-    glBegin(GL_TRIANGLE_FAN);
-    glVertex2f(0, 0);
-    for (int i = 0; i <= 25; ++i) {
-        float a = i * 2.0f * 3.1415926f / 25.0f;
-        float x = 7.0f * cosf(a);
-        float y = 11.0f * sinf(a);
-        glVertex2f(x, y);
-    }
-    glEnd();
+    glCallList(eggDL);
 }
 
 void drawBulletShape()
@@ -435,17 +173,25 @@ void drawStar()
     glEnd();
 }
 
-void drawExplosion()
+// t in [0, 1] – explosion progress (0 = start, 1 = end)
+void drawExplosionLines(float t)
 {
-    glColor3f(1.0f, 0.7f, 0.1f);
-    glBegin(GL_TRIANGLE_FAN);
-    glVertex2f(0, 0);
-    for (int i = 0; i <= 20; ++i) {
-        float a = i * 2.0f * 3.1415926f / 20.0f;
-        float r = 25.0f + 10.0f * sinf(5.0f * a);
-        glVertex2f(r * cosf(a), r * sinf(a));
+    int numRings = 3;          // number of concentric circles
+    float maxRadius = 80.0f;   // how big the explosion gets at the end
+
+    glLineWidth(2.0f);
+
+    for (int ring = 0; ring < numRings; ++ring) {
+        // the radius for the current circle increases by t
+        float baseR = maxRadius * (ring + 1) / numRings * t;
+        if (baseR <= 0.0f)
+            continue;
+
+        glPushMatrix();
+        glScalef(baseR, baseR, 1.0f);
+        glCallList(explosionRingDL);
+        glPopMatrix();
     }
-    glEnd();
 }
 
 // UFO object used to show composed transformations
@@ -453,13 +199,8 @@ void drawUFO()
 {
     // dome
     glColor3f(0.7f, 0.7f, 1.0f);
-    glBegin(GL_TRIANGLE_FAN);
-    glVertex2f(0, 0);
-    for (int i = 0; i <= 40; ++i) {
-        float a = i * 2.0f * 3.1415926f / 40.0f;
-        glVertex2f(25.0f * cosf(a), 12.0f * sinf(a));
-    }
-    glEnd();
+    drawEllipse(0.0f, 0.0f, 25.0f, 16.0f);
+
 
     // base
     glColor3f(0.5f, 0.5f, 0.9f);
@@ -471,11 +212,13 @@ void drawUFO()
     glEnd();
 
     // small lights
-    glPointSize(4);
-    glBegin(GL_POINTS);
-    glColor3f(1.0f, 0.2f, 0.2f); glVertex2f(-30, -10);
-    glColor3f(0.2f, 1.0f, 0.2f); glVertex2f(0, -12);
-    glColor3f(0.2f, 0.8f, 1.0f); glVertex2f(30, -10);
+    float lightRadius = 4.0f;
+    glColor3f(1.0f, 0.2f, 0.2f); 
+    drawCircle(-30.0f, -10.0f, lightRadius);
+    glColor3f(0.2f, 1.0f, 0.2f); 
+    drawCircle(0.0f, -12.0f, lightRadius);
+    glColor3f(0.2f, 0.8f, 1.0f); 
+    drawCircle(30.0f, -10.0f, lightRadius);
     glEnd();
 }
 
@@ -505,12 +248,12 @@ void drawHUD()
     if (gameOver) {
         glColor3f(1, 0.2f, 0.2f);
         renderBitmapString(-80, 0, GLUT_BITMAP_HELVETICA_18, "GAME OVER");
-        renderBitmapString(-160, -30, GLUT_BITMAP_8_BY_13, "Press R to restart");
+        renderBitmapString(-100, -30, GLUT_BITMAP_8_BY_13, "Press R to restart");
     }
     else if (gameWin) {
         glColor3f(0.2f, 1.0f, 0.2f);
         renderBitmapString(-80, 0, GLUT_BITMAP_HELVETICA_18, "YOU WIN");
-        renderBitmapString(-160, -30, GLUT_BITMAP_8_BY_13, "Press R to restart");
+        renderBitmapString(-100, -30, GLUT_BITMAP_8_BY_13, "Press R to restart");
     }
 }
 
@@ -540,6 +283,21 @@ void resetGame()
     shipX = 0.0f;
     shipY = -300.0f;
 
+    shipExplosionActive = false;
+    shipExplosionX = 0.0f;
+    shipExplosionY = 0.0f;
+    shipExplosionTimer = 0.0f;
+
+    // UFO
+    ufoAngle = 0.0f;
+    ufoOrbit = 0.0f;
+    ufoScale = 1.0f;
+    ufoTargetScale = 1.0f;
+    ufoApproach = false;
+    ufoPulsePhase = 0.0f;
+    ufoPulseAmount = 0.2f;
+    ufoLifeStep = 0.2f;
+
     // chickens in 2 rows
     for (int i = 0; i < NUM_CHICKENS; ++i) {
         chickens[i].alive = true;
@@ -560,12 +318,94 @@ void resetGame()
     eggCooldown = 0;
 }
 
-void initGL()
+void init()
 {
     glClearColor(0.0f, 0.0f, 0.08f, 1.0f);
     glPointSize(2.0f);
 
     resetGame();
+
+    // --- circleDL: display list for a unit circle (radius = 1.0) ---
+    // Used for all circular and elliptical shapes (chickens, UFO dome, lights, etc.)
+    circleDL = glGenLists(1);
+    glNewList(circleDL, GL_COMPILE);
+    glBegin(GL_TRIANGLE_FAN);
+    int numSegments = 64;
+    for (int i = 0; i < numSegments; ++i)
+    {
+        float theta = TWO_PI * (float)i / (float)numSegments;
+        float x = cosf(theta);
+        float y = sinf(theta);
+        glVertex2f(x, y);
+    }
+    glEnd();
+    glEndList();
+
+    // --- shipDL: display list for ship model ---
+    shipDL = glGenLists(1);
+    glNewList(shipDL, GL_COMPILE);
+
+    // body
+    glColor3f(0.2f, 0.6f, 1.0f);
+    glBegin(GL_TRIANGLES);
+    glVertex2f(0, 40);
+    glVertex2f(-25, -25);
+    glVertex2f(25, -25);
+    glEnd();
+
+    // engine
+    glColor3f(1.0f, 0.3f, 0.2f);
+    glBegin(GL_QUADS);
+    glVertex2f(-12, -25);
+    glVertex2f(12, -25);
+    glVertex2f(12, -45);
+    glVertex2f(-12, -45);
+    glEnd();
+    glEndList();
+
+    // --- eggDL: display list for egg shape ---
+    eggDL = glGenLists(1);
+    glNewList(eggDL, GL_COMPILE);
+    glBegin(GL_TRIANGLE_FAN);
+    glVertex2f(0, 0);
+    for (int i = 0; i <= 25; ++i) {
+        float a = i * TWO_PI / 25.0f;
+        float x = 7.0f * cosf(a);
+        float y = 11.0f * sinf(a);
+        glVertex2f(x, y);
+    }
+    glEnd();
+    glEndList();
+
+
+    // --- explosionRingDL: display list for short line segments arranged on a unit circle ---
+    // Used to draw concentric explosion rings by scaling this pattern
+    explosionRingDL = glGenLists(1);
+    glNewList(explosionRingDL, GL_COMPILE);
+
+    int segmentsPerRing = 24;   // number of positions on the circle
+    glBegin(GL_LINES);
+    for (int i = 0; i < segmentsPerRing; ++i) {
+
+        // draw only half of the lines (interrupted lines)
+        if (i % 2 == 1) continue;
+
+        float a0 = (float)i * TWO_PI / segmentsPerRing;
+        float a1 = (float)(i + 0.4f) * TWO_PI / segmentsPerRing; // short line
+
+        float r0 = 1.0f;
+        float r1 = 1.0f + 0.1f;
+
+        float x0 = r0 * cosf(a0);
+        float y0 = r0 * sinf(a0);
+        float x1 = r1 * cosf(a1);
+        float y1 = r1 * sinf(a1);
+
+        glVertex2f(x0, y0);
+        glVertex2f(x1, y1);
+    }
+    glEnd();
+    glEndList();
 }
 
 // -------------------------------
@@ -590,17 +430,25 @@ void display()
 
     // UFO with composed transformations:
     // T1 (height) * T2 (orbit) * R (spin) * model
-    glPushMatrix();
-    // base vertical position
-    glTranslatef(0.0f, 260.0f, 0.0f);
-    // orbit movement
-    glTranslatef(ufoOrbitRadiusX * cosf(ufoOrbit),
-        ufoOrbitRadiusY * sinf(ufoOrbit),
-        0.0f);
-    // rotation around its own center
-    glRotatef(ufoAngle, 0, 0, 1);
-    drawUFO();
-    glPopMatrix();
+    if (!gameWin) {             // player wins, the UFO disappears
+        glPushMatrix();
+        // vertical translation
+        glTranslatef(0.0f, 260.0f, 0.0f);
+        // orbit movement
+        glTranslatef(ufoOrbitRadiusX * cosf(ufoOrbit),
+            ufoOrbitRadiusY * sinf(ufoOrbit),
+            0.0f);
+
+        //scale
+        float pulse = sinf(ufoPulsePhase) * ufoPulseAmount;
+        float ufoFinalScale = ufoScale + pulse;
+        glScalef(ufoFinalScale, ufoFinalScale, 1.0f);
+
+        // rotation 
+        glRotatef(ufoAngle, 0, 0, 1);
+        drawUFO();
+        glPopMatrix();
+    }
 
     // draw chickens (with small local rotation for animation)
     for (int i = 0; i < NUM_CHICKENS; ++i) {
@@ -636,11 +484,28 @@ void display()
         glPopMatrix();
     }
 
-    // draw ship
-    glPushMatrix();
-    glTranslatef(shipX, shipY, 0.0f);
-    drawShip();
-    glPopMatrix();
+    // draw ship (only if game is not over)
+    if (!gameOver) {
+        glPushMatrix();
+        glTranslatef(shipX, shipY, 0.0f);
+        drawShip();
+        glPopMatrix();
+    }
+
+    // explosion at game over
+    if (shipExplosionActive) {
+        // explosion progress between 0 and 1
+        float t = 1.0f - shipExplosionTimer / shipExplosionMaxTime;
+        if (t < 0.0f) t = 0.0f;
+        if (t > 1.0f) t = 1.0f;
+
+        glPushMatrix();
+        glTranslatef(shipExplosionX, shipExplosionY, 0.0f);
+
+        glColor3f(1.0f, 0.6f, 0.1f);
+        drawExplosionLines(t);
+        glPopMatrix();
+    }
 
     // HUD
     drawHUD();
@@ -663,7 +528,22 @@ void update(int value)
         if (ufoAngle > 360.0f) ufoAngle -= 360.0f;
 
         ufoOrbit += 0.01f;
-        if (ufoOrbit > 6.2832f) ufoOrbit -= 6.2832f;
+        if (ufoOrbit > TWO_PI) ufoOrbit -= TWO_PI;
+
+        // animation (lerp)
+        if (ufoApproach) {
+            float speed = 0.05f;
+            ufoScale += (ufoTargetScale - ufoScale) * speed;
+
+            if (fabs(ufoScale - ufoTargetScale) < 0.01f) {
+                ufoScale = ufoTargetScale;
+                ufoApproach = false;
+            }
+        }
+
+        ufoPulsePhase += 0.08f;          // pulse speed
+        if (ufoPulsePhase > TWO_PI)
+            ufoPulsePhase -= TWO_PI;
 
         // bullets movement and collisions
         for (int i = 0; i < MAX_BULLETS; ++i) {
@@ -707,8 +587,25 @@ void update(int value)
                 shipX, shipY, 25.0f)) {
                 eggs[i].active = false;
                 lives--;
+
+                // UFO becomes larger
+                ufoTargetScale += ufoLifeStep;
+                ufoApproach = true;
+
                 if (lives <= 0) {
                     gameOver = true;
+
+                    // at game over, the UFO becomes even larger and stops approaching
+                    ufoScale = 2.5f;
+                    ufoTargetScale = 2.5f;
+                    ufoApproach = false;
+
+                    // start explosion
+                    shipExplosionActive = true;
+                    shipExplosionX = shipX;
+                    shipExplosionY = shipY;
+                    shipExplosionTimer = 0.6f;   // 0.6 sec
+                    shipExplosionTimer = shipExplosionMaxTime;
                 }
             }
         }
@@ -752,6 +649,19 @@ void update(int value)
         }
         if (!anyAlive) {
             gameWin = true;
+
+            // deactivate all eggs when the game is won
+            for (int i = 0; i < MAX_EGGS; ++i) {
+                eggs[i].active = false;
+            }
+        }
+    }
+
+    // update explosion timer so the effect only lasts for a short period after game over
+    if (shipExplosionActive) {
+        shipExplosionTimer -= 0.016f;   // approx. 60 FPS
+        if (shipExplosionTimer <= 0.0f) {
+            shipExplosionActive = false;
         }
     }
 
@@ -832,7 +742,7 @@ int main(int argc, char** argv)
     glutInitWindowPosition(100, 50);
     glutCreateWindow("Chicken Invaders 2D");
 
-    initGL();
+    init();
 
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
