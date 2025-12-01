@@ -3,48 +3,38 @@
 #include <stdio.h>
 #include <GL/freeglut.h>
 
-// -------------------------------
-// Window / world settings
-// -------------------------------
+// setari pentru fereastra si lume
 const int   WIN_WIDTH = 800;
 const int   WIN_HEIGHT = 700;
 const float WORLD_MIN = -400.0f;
 const float WORLD_MAX = 400.0f;
 
-// -------------------------------
-// Helpers / Display lists
-// -------------------------------
+// liste de display si variabile ajutatoare
 const float TWO_PI = 6.2831853f;
 GLuint circleDL;    // created in init()
 GLuint shipDL;
 GLuint eggDL;
 GLuint explosionRingDL;
 
-// -------------------------------
-// Player / game state
-// -------------------------------
+// stare jucator si stare joc
 int   score = 0;
 int   lives = 3;
 bool  gameOver = false;
 bool  gameWin = false;
 
-// explosion at game over
+// date pentru explozia navei la finalul jocului
 bool  shipExplosionActive = false;
 float shipExplosionX = 0.0f;
 float shipExplosionY = 0.0f;
-float shipExplosionTimer = 0.0f;   // time in seconds
-const float shipExplosionMaxTime = 0.6f;  // total duration (0.6 sec)
+float shipExplosionTimer = 0.0f;   // timp in secunde
+const float shipExplosionMaxTime = 0.6f;  // durata totala (0.6 secunde)
 
-// -------------------------------
-// Ship (player)
-// -------------------------------
+// date pentru nava jucatorului
 float shipX = 0.0f;
 float shipY = -300.0f;
 float shipSpeed = 6.0f;
 
-// -------------------------------
-// Chickens
-// -------------------------------
+// date pentru gaini
 const int NUM_CHICKENS = 8;
 
 struct Chicken {
@@ -53,13 +43,11 @@ struct Chicken {
     bool  alive;
 } chickens[NUM_CHICKENS];
 
-float chickenWaveAngle = 0.0f;      // for sinusoidal movement
+float chickenWaveAngle = 0.0f;      // pentru miscarea sinusoidala
 float chickenWaveSpeed = 0.015f;
-float chickenWaveAmp = 80.0f;     // amplitude
+float chickenWaveAmp = 80.0f;     // amplitudine
 
-// -------------------------------
-// Bullets (from player)
-// -------------------------------
+// gloantele trase de jucator
 const int MAX_BULLETS = 10;
 
 struct Bullet {
@@ -69,9 +57,7 @@ struct Bullet {
 
 float bulletSpeed = 10.0f;
 
-// -------------------------------
-// Eggs (from chickens)
-// -------------------------------
+// ouale aruncate de gaini
 const int MAX_EGGS = 5;
 
 struct Egg {
@@ -80,29 +66,26 @@ struct Egg {
 } eggs[MAX_EGGS];
 
 float eggSpeed = 4.5f;
-int   eggCooldown = 0;              // simple timer for egg spawns
+int   eggCooldown = 0;  //timer pentru urmatorul ou
 
-// -------------------------------
-// UFO (object with composed transforms)
-// -------------------------------
-float ufoAngle = 0.0f;              // spin
-float ufoOrbit = 0.0f;              // orbit angle
+// UFO (OZN)
+float ufoAngle = 0.0f;   // unghiul de rotatie al ozn ului
+float ufoOrbit = 0.0f;    // unghiul orbitei pe care se misca ozn ul
 float ufoOrbitRadiusX = 200.0f;
 float ufoOrbitRadiusY = 60.0f;
 
-// scale and pulse for simulating the object moving closer or farther from the camera
+// scalare si pulsare pentru simularea apropierii si departarii obiectului fata de camera
 float ufoScale = 1.0f;
 float ufoTargetScale = 1.2f;
 bool  ufoApproach = false;
 
-float ufoPulsePhase = 0.0f;         // sinus phase
-float ufoPulseAmount = 0.2f;        // pulse amplitude (how strong the UFO scales in/out)
-float ufoLifeStep = 0.2f;           // how much the UFO permanently grows when the player loses a life
+float ufoPulsePhase = 0.0f;  // faza sinusoidei pentru pulsare
+float ufoPulseAmount = 0.2f;   // amplitudinea pulsului (cat de mult variaza marimea OZN-ului)
+float ufoLifeStep = 0.2f;   // cat de mult creste OZN-ul cand jucatorul pierde o viata
 
-// -------------------------------
-// Utility
-// -------------------------------
-// draw a circle with radius r and center at(cx, cy)
+// functii utilitare
+
+// functie de desenare a unui cerc cu raza r si centrul in punctul (cx, cy)
 void drawCircle(float cx, float cy, float r)
 {
     glPushMatrix();
@@ -112,7 +95,7 @@ void drawCircle(float cx, float cy, float r)
     glPopMatrix();
 }
 
-// draw ellipse using different radius on x and y
+// functie de desenare a unei elipse folosind raze diferite pe axele x si y
 void drawEllipse(float cx, float cy, float rx, float ry)
 {
     glPushMatrix();
@@ -126,9 +109,7 @@ float toRad(float deg) {
     return deg * 3.1415926f / 180.0f;
 }
 
-// -------------------------------
-// DRAW FUNCTIONS
-// -------------------------------
+// functii de desenare
 void drawShip()
 {
     glCallList(shipDL);
@@ -136,11 +117,11 @@ void drawShip()
 
 void drawChickenShape()
 {
-    // body
+    // corpul gainii
     glColor3f(1.0f, 1.0f, 0.0f);
     drawCircle(0.0f, 0.0f, 20.0f);
 
-    // comb
+    // creasta
     glColor3f(1.0f, 0.3f, 0.3f);
     glBegin(GL_TRIANGLES);
     glVertex2f(0, 20);
@@ -173,16 +154,16 @@ void drawStar()
     glEnd();
 }
 
-// t in [0, 1] – explosion progress (0 = start, 1 = end)
+// t este in intervalul [0, 1] si reprezinta progresul exploziei (0 = inceput, 1 = final)
 void drawExplosionLines(float t)
 {
-    int numRings = 3;          // number of concentric circles
-    float maxRadius = 80.0f;   // how big the explosion gets at the end
+    int numRings = 3;   // numarul de cercuri concentrice ale exploziei
+    float maxRadius = 80.0f;   // raza maxima a exploziei la final
 
     glLineWidth(2.0f);
 
     for (int ring = 0; ring < numRings; ++ring) {
-        // the radius for the current circle increases by t
+        // raza cercului curent creste proportional cu t
         float baseR = maxRadius * (ring + 1) / numRings * t;
         if (baseR <= 0.0f)
             continue;
@@ -194,15 +175,15 @@ void drawExplosionLines(float t)
     }
 }
 
-// UFO object used to show composed transformations
+// modelul OZ-ului folosit pentru a demonstra transformari compuse
 void drawUFO()
 {
-    // dome
+    // cupola OZN-ului
     glColor3f(0.7f, 0.7f, 1.0f);
     drawEllipse(0.0f, 0.0f, 25.0f, 16.0f);
 
 
-    // base
+    // baza OZN-ului
     glColor3f(0.5f, 0.5f, 0.9f);
     glBegin(GL_QUADS);
     glVertex2f(-40, -8);
@@ -211,7 +192,7 @@ void drawUFO()
     glVertex2f(-50, -16);
     glEnd();
 
-    // small lights
+    // luminile mici de pe OZN
     float lightRadius = 4.0f;
     glColor3f(1.0f, 0.2f, 0.2f); 
     drawCircle(-30.0f, -10.0f, lightRadius);
@@ -222,9 +203,7 @@ void drawUFO()
     glEnd();
 }
 
-// -------------------------------
-// HUD / TEXT
-// -------------------------------
+// toate informatiile afisate pe ecran peste joc
 void renderBitmapString(float x, float y, void* font, const char* string)
 {
     glRasterPos2f(x, y);
@@ -257,9 +236,7 @@ void drawHUD()
     }
 }
 
-// -------------------------------
-// COLLISIONS
-// -------------------------------
+//coliziuni
 bool checkCollisionCircle(float x1, float y1, float r1,
     float x2, float y2, float r2)
 {
@@ -270,9 +247,7 @@ bool checkCollisionCircle(float x1, float y1, float r1,
     return dist2 <= r * r;
 }
 
-// -------------------------------
-// INITIALIZATION
-// -------------------------------
+//initializare joc
 void resetGame()
 {
     score = 0;
@@ -288,7 +263,7 @@ void resetGame()
     shipExplosionY = 0.0f;
     shipExplosionTimer = 0.0f;
 
-    // UFO
+    // resetare variabile pentru ozn
     ufoAngle = 0.0f;
     ufoOrbit = 0.0f;
     ufoScale = 1.0f;
@@ -298,7 +273,7 @@ void resetGame()
     ufoPulseAmount = 0.2f;
     ufoLifeStep = 0.2f;
 
-    // chickens in 2 rows
+    // pozitionare gaini in doua randuri
     for (int i = 0; i < NUM_CHICKENS; ++i) {
         chickens[i].alive = true;
         int row = i / 4;    // 0 or 1
@@ -307,11 +282,11 @@ void resetGame()
         chickens[i].baseY = 200.0f + row * 80.0f;
     }
 
-    // bullets
+    // dezactivare gloante
     for (int i = 0; i < MAX_BULLETS; ++i)
         bullets[i].active = false;
 
-    // eggs
+    // dezactivare oua
     for (int i = 0; i < MAX_EGGS; ++i)
         eggs[i].active = false;
 
@@ -325,8 +300,8 @@ void init()
 
     resetGame();
 
-    // --- circleDL: display list for a unit circle (radius = 1.0) ---
-    // Used for all circular and elliptical shapes (chickens, UFO dome, lights, etc.)
+    // circleDL: lista de display pentru un cerc unitar (raza = 1.0)
+    // folosita pentru toate formele circulare si eliptice (gaini, cupola ozn, lumini etc.)
     circleDL = glGenLists(1);
     glNewList(circleDL, GL_COMPILE);
     glBegin(GL_TRIANGLE_FAN);
@@ -341,11 +316,11 @@ void init()
     glEnd();
     glEndList();
 
-    // --- shipDL: display list for ship model ---
+    // shipDL: lista de display pentru modelul navei
     shipDL = glGenLists(1);
     glNewList(shipDL, GL_COMPILE);
 
-    // body
+    // corpul navei
     glColor3f(0.2f, 0.6f, 1.0f);
     glBegin(GL_TRIANGLES);
     glVertex2f(0, 40);
@@ -353,7 +328,7 @@ void init()
     glVertex2f(25, -25);
     glEnd();
 
-    // engine
+    // motorul navei
     glColor3f(1.0f, 0.3f, 0.2f);
     glBegin(GL_QUADS);
     glVertex2f(-12, -25);
@@ -363,7 +338,7 @@ void init()
     glEnd();
     glEndList();
 
-    // --- eggDL: display list for egg shape ---
+    // eggDL: lista de display pentru forma oului
     eggDL = glGenLists(1);
     glNewList(eggDL, GL_COMPILE);
     glBegin(GL_TRIANGLE_FAN);
@@ -378,20 +353,20 @@ void init()
     glEndList();
 
 
-    // --- explosionRingDL: display list for short line segments arranged on a unit circle ---
-    // Used to draw concentric explosion rings by scaling this pattern
+    // explosionRingDL: lista de display pentru segmente scurte de linie dispuse pe un cerc unitar
+    // folosita pentru a desena inele concentrice in timpul exploziei, prin scalarea acestui model
     explosionRingDL = glGenLists(1);
     glNewList(explosionRingDL, GL_COMPILE);
 
-    int segmentsPerRing = 24;   // number of positions on the circle
+    int segmentsPerRing = 24;   // numarul de pozitii pe cerc
     glBegin(GL_LINES);
     for (int i = 0; i < segmentsPerRing; ++i) {
 
-        // draw only half of the lines (interrupted lines)
+        // se deseneaza doar jumatate din linii (linii intrerupte)
         if (i % 2 == 1) continue;
 
         float a0 = (float)i * TWO_PI / segmentsPerRing;
-        float a1 = (float)(i + 0.4f) * TWO_PI / segmentsPerRing; // short line
+        float a1 = (float)(i + 0.4f) * TWO_PI / segmentsPerRing; // linie scurta
 
         float r0 = 1.0f;
         float r1 = 1.0f + 0.1f;
@@ -408,16 +383,14 @@ void init()
     glEndList();
 }
 
-// -------------------------------
-// DISPLAY
-// -------------------------------
+//afisare
 void display()
 {
     glClear(GL_COLOR_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    // background stars (randomized each frame for a simple effect)
+    // afiseaza stele de fundal (pozitii aleatorii la fiecare cadru pentru efect)
     glColor3f(1, 1, 1);
     for (int i = 0; i < 80; ++i) {
         glPushMatrix();
@@ -428,29 +401,29 @@ void display()
         glPopMatrix();
     }
 
-    // UFO with composed transformations:
-    // T1 (height) * T2 (orbit) * R (spin) * model
-    if (!gameWin) {             // player wins, the UFO disappears
+    // OZN cu transformari compuse:
+    // t1 (inaltime) * t2 (orbita) * r (rotatie) * model
+    if (!gameWin) { // daca jucatorul castiga, ozn ul dispare
         glPushMatrix();
-        // vertical translation
+        // translatie pe verticala
         glTranslatef(0.0f, 260.0f, 0.0f);
-        // orbit movement
+        // miscare pe orbita
         glTranslatef(ufoOrbitRadiusX * cosf(ufoOrbit),
             ufoOrbitRadiusY * sinf(ufoOrbit),
             0.0f);
 
-        //scale
+        // scalare cu efect de puls
         float pulse = sinf(ufoPulsePhase) * ufoPulseAmount;
         float ufoFinalScale = ufoScale + pulse;
         glScalef(ufoFinalScale, ufoFinalScale, 1.0f);
 
-        // rotation 
+        // rotatie
         glRotatef(ufoAngle, 0, 0, 1);
         drawUFO();
         glPopMatrix();
     }
 
-    // draw chickens (with small local rotation for animation)
+    // se deseneaza gainile (cu o mica rotatie)
     for (int i = 0; i < NUM_CHICKENS; ++i) {
         if (!chickens[i].alive) continue;
 
@@ -464,7 +437,7 @@ void display()
         glPopMatrix();
     }
 
-    // draw eggs
+    // se deseneaza ouale
     for (int i = 0; i < MAX_EGGS; ++i) {
         if (!eggs[i].active) continue;
 
@@ -474,7 +447,7 @@ void display()
         glPopMatrix();
     }
 
-    // draw bullets
+    // se deseneaza gloantele
     for (int i = 0; i < MAX_BULLETS; ++i) {
         if (!bullets[i].active) continue;
 
@@ -484,7 +457,7 @@ void display()
         glPopMatrix();
     }
 
-    // draw ship (only if game is not over)
+    // se deseneaza nava doar daca jocul nu s a terminat
     if (!gameOver) {
         glPushMatrix();
         glTranslatef(shipX, shipY, 0.0f);
@@ -492,9 +465,9 @@ void display()
         glPopMatrix();
     }
 
-    // explosion at game over
+    // se afiseaza explozia la finalul jocului
     if (shipExplosionActive) {
-        // explosion progress between 0 and 1
+        // progresul exploziei intre 0 si 1
         float t = 1.0f - shipExplosionTimer / shipExplosionMaxTime;
         if (t < 0.0f) t = 0.0f;
         if (t > 1.0f) t = 1.0f;
@@ -507,30 +480,27 @@ void display()
         glPopMatrix();
     }
 
-    // HUD
     drawHUD();
 
     glFlush();
 }
 
-// -------------------------------
-// UPDATE (TIMER)
-// -------------------------------
+// actualizare (timer)
 void update(int value)
 {
     if (!gameOver && !gameWin) {
 
-        // chicken global wave
+        // miscarea globala sinusoidala a gainilor
         chickenWaveAngle += chickenWaveSpeed;
 
-        // UFO animation
+        // animatia OZN-ului
         ufoAngle += 1.5f;
         if (ufoAngle > 360.0f) ufoAngle -= 360.0f;
 
         ufoOrbit += 0.01f;
         if (ufoOrbit > TWO_PI) ufoOrbit -= TWO_PI;
 
-        // animation (lerp)
+        // animatie de apropiere prin interpolare liniara
         if (ufoApproach) {
             float speed = 0.05f;
             ufoScale += (ufoTargetScale - ufoScale) * speed;
@@ -541,11 +511,11 @@ void update(int value)
             }
         }
 
-        ufoPulsePhase += 0.08f;          // pulse speed
+        ufoPulsePhase += 0.08f;          // viteza pulsului
         if (ufoPulsePhase > TWO_PI)
             ufoPulsePhase -= TWO_PI;
 
-        // bullets movement and collisions
+        // miscarea gloantelor si coliziunile lor
         for (int i = 0; i < MAX_BULLETS; ++i) {
             if (!bullets[i].active) continue;
 
@@ -555,7 +525,7 @@ void update(int value)
                 continue;
             }
 
-            // check collision with chickens
+            // verificarea coliziunilor cu gainile
             for (int j = 0; j < NUM_CHICKENS; ++j) {
                 if (!chickens[j].alive) continue;
 
@@ -572,7 +542,7 @@ void update(int value)
             }
         }
 
-        // eggs movement and collisions
+        // miscarea oualor si coliziunile cu ele
         for (int i = 0; i < MAX_EGGS; ++i) {
             if (!eggs[i].active) continue;
 
@@ -582,38 +552,38 @@ void update(int value)
                 continue;
             }
 
-            // collision with ship
+            // coliziune cu nava jucatorului
             if (checkCollisionCircle(eggs[i].x, eggs[i].y, 10.0f,
                 shipX, shipY, 25.0f)) {
                 eggs[i].active = false;
                 lives--;
 
-                // UFO becomes larger
+                // OZN-ul devine mai mare
                 ufoTargetScale += ufoLifeStep;
                 ufoApproach = true;
 
                 if (lives <= 0) {
                     gameOver = true;
 
-                    // at game over, the UFO becomes even larger and stops approaching
+                    // cand jocul se termina, OZN-ul devine si mai mare si nu se mai apropie
                     ufoScale = 2.5f;
                     ufoTargetScale = 2.5f;
                     ufoApproach = false;
 
-                    // start explosion
+                    /// porneste animatia exploziei
                     shipExplosionActive = true;
                     shipExplosionX = shipX;
                     shipExplosionY = shipY;
-                    shipExplosionTimer = 0.6f;   // 0.6 sec
+                    shipExplosionTimer = 0.6f;   // 0.6 secunde
                     shipExplosionTimer = shipExplosionMaxTime;
                 }
             }
         }
 
-        // random egg spawn from random alive chicken
+        // generarea aleatorie a unui ou de la o gaina
         if (eggCooldown > 0) eggCooldown--;
         if (eggCooldown == 0) {
-            // find a free egg slot
+            // cauta un slot liber pentru ou
             int slot = -1;
             for (int i = 0; i < MAX_EGGS; ++i) {
                 if (!eggs[i].active) {
@@ -622,7 +592,7 @@ void update(int value)
                 }
             }
             if (slot != -1) {
-                // choose random chicken
+				// se alege aleator o gaina pentru a arunca oul
                 int tries = 0;
                 while (tries < 10) {
                     int c = rand() % NUM_CHICKENS;
@@ -635,11 +605,11 @@ void update(int value)
                     }
                     tries++;
                 }
-                eggCooldown = 50 + rand() % 60; // delay until next egg
+                eggCooldown = 50 + rand() % 60; // intarziere pana la urmatorul ou
             }
         }
 
-        // check win condition
+        // verificarea conditiei de castig
         bool anyAlive = false;
         for (int i = 0; i < NUM_CHICKENS; ++i) {
             if (chickens[i].alive) {
@@ -650,16 +620,16 @@ void update(int value)
         if (!anyAlive) {
             gameWin = true;
 
-            // deactivate all eggs when the game is won
+            // se dezactiveaza toate ouale cand jocul este castigat
             for (int i = 0; i < MAX_EGGS; ++i) {
                 eggs[i].active = false;
             }
         }
     }
 
-    // update explosion timer so the effect only lasts for a short period after game over
+    // se actualizeaza timer-ul pentru explozie, astfel incat sa dureze putin dupa final
     if (shipExplosionActive) {
-        shipExplosionTimer -= 0.016f;   // approx. 60 FPS
+        shipExplosionTimer -= 0.016f;   // aprox. 60 FPS
         if (shipExplosionTimer <= 0.0f) {
             shipExplosionActive = false;
         }
@@ -669,9 +639,7 @@ void update(int value)
     glutTimerFunc(16, update, 0); // ~60 FPS
 }
 
-// -------------------------------
-// INPUT
-// -------------------------------
+// input (ce taste fac ce actiuni)
 bool keyStates[256] = { false };
 
 void keyDown(unsigned char key, int x, int y)
@@ -687,7 +655,7 @@ void keyDown(unsigned char key, int x, int y)
     }
 
     if (key == ' ') {
-        // fire bullet
+        // trage un glont
         for (int i = 0; i < MAX_BULLETS; ++i) {
             if (!bullets[i].active) {
                 bullets[i].active = true;
@@ -713,14 +681,12 @@ void specialDown(int key, int x, int y)
         shipX += shipSpeed;
     }
 
-    // clamp ship inside world
+    // limiteaza nava sa ramana in interiorul zonei de joc
     if (shipX < WORLD_MIN + 40) shipX = WORLD_MIN + 40;
     if (shipX > WORLD_MAX - 40) shipX = WORLD_MAX - 40;
 }
 
-// -------------------------------
-// RESHAPE
-// -------------------------------
+// gestioneaza redimensionarea ferestrei si seteaza modul de afisare 2d
 void reshape(int w, int h)
 {
     glViewport(0, 0, w, h);
@@ -731,9 +697,7 @@ void reshape(int w, int h)
     glLoadIdentity();
 }
 
-// -------------------------------
-// MAIN
-// -------------------------------
+//main
 int main(int argc, char** argv)
 {
     glutInit(&argc, argv);
