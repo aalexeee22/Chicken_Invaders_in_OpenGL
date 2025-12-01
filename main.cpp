@@ -11,7 +11,7 @@ const float WORLD_MAX = 400.0f;
 
 // liste de display si variabile ajutatoare
 const float TWO_PI = 6.2831853f;
-GLuint circleDL;    // created in init()
+GLuint circleDL;    // creat in init()
 GLuint shipDL;
 GLuint eggDL;
 GLuint explosionRingDL;
@@ -69,8 +69,8 @@ float eggSpeed = 4.5f;
 int   eggCooldown = 0;  //timer pentru urmatorul ou
 
 // UFO (OZN)
-float ufoAngle = 0.0f;   // unghiul de rotatie al ozn ului
-float ufoOrbit = 0.0f;    // unghiul orbitei pe care se misca ozn ul
+float ufoAngle = 0.0f;   // unghiul de rotatie al OZN-ului
+float ufoOrbit = 0.0f;    // unghiul orbitei pe care se misca OZN-ul
 float ufoOrbitRadiusX = 200.0f;
 float ufoOrbitRadiusY = 60.0f;
 
@@ -175,7 +175,7 @@ void drawExplosionLines(float t)
     }
 }
 
-// modelul OZ-ului folosit pentru a demonstra transformari compuse
+// modelul OZN-ului folosit pentru a demonstra transformari compuse
 void drawUFO()
 {
     // cupola OZN-ului
@@ -403,7 +403,7 @@ void display()
 
     // OZN cu transformari compuse:
     // t1 (inaltime) * t2 (orbita) * r (rotatie) * model
-    if (!gameWin) { // daca jucatorul castiga, ozn ul dispare
+    if (!gameWin) { // daca jucatorul castiga, OZN-ul dispare
         glPushMatrix();
         // translatie pe verticala
         glTranslatef(0.0f, 260.0f, 0.0f);
@@ -457,7 +457,7 @@ void display()
         glPopMatrix();
     }
 
-    // se deseneaza nava doar daca jocul nu s a terminat
+    // se deseneaza nava doar daca jocul nu s-a terminat
     if (!gameOver) {
         glPushMatrix();
         glTranslatef(shipX, shipY, 0.0f);
@@ -511,7 +511,7 @@ void update(int value)
             }
         }
 
-        ufoPulsePhase += 0.08f;          // viteza pulsului
+        ufoPulsePhase += 0.08f;   // viteza pulsului
         if (ufoPulsePhase > TWO_PI)
             ufoPulsePhase -= TWO_PI;
 
@@ -686,7 +686,7 @@ void specialDown(int key, int x, int y)
     if (shipX > WORLD_MAX - 40) shipX = WORLD_MAX - 40;
 }
 
-// gestioneaza redimensionarea ferestrei si seteaza modul de afisare 2d
+// gestioneaza redimensionarea ferestrei si seteaza modul de afisare 2D
 void reshape(int w, int h)
 {
     glViewport(0, 0, w, h);
