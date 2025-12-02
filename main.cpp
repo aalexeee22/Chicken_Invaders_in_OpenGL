@@ -84,7 +84,6 @@ float ufoPulseAmount = 0.2f;   // amplitudinea pulsului (cat de mult variaza mar
 float ufoLifeStep = 0.2f;   // cat de mult creste OZN-ul cand jucatorul pierde o viata
 
 // functii utilitare
-
 // functie de desenare a unui cerc cu raza r si centrul in punctul (cx, cy)
 void drawCircle(float cx, float cy, float r)
 {
@@ -103,10 +102,6 @@ void drawEllipse(float cx, float cy, float rx, float ry)
     glScalef(rx, ry, 1.0f);
     glCallList(circleDL);
     glPopMatrix();
-}
-
-float toRad(float deg) {
-    return deg * 3.1415926f / 180.0f;
 }
 
 // functii de desenare
